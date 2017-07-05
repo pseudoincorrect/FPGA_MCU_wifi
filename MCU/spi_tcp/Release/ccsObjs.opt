@@ -1,1 +1,0 @@
-"./main.obj" "./network_common.obj" "./startup_ccs.obj" "./uart_if.obj" "./udma_if.obj" "./application/src/common_app.obj" "./application/src/ring_buffer.obj" "./application/src/user_main.obj" "../cc3200v1p32.cmd" -llibc.a -l"C:/ti/cc3200_sdk/cc3200-sdk/simplelink/ccs/NON_OS/simplelink.a" -l"C:/ti/cc3200_sdk/cc3200-sdk/driverlib/ccs/Release/driverlib.a" 
