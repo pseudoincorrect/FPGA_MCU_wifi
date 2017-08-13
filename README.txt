@@ -33,4 +33,12 @@ PC Receiver
 
 ----------------------------------------------------------------
 
+Repository's folders:
+
+FPGA: contains the verilog code/description for the FPGA transmission
+MCU: contains the C code for the CC3200 from TI (wireless app MCU)
+PC_RECEIVER: contains the python code to receive data and perform a integrity test on them
+
+----------------------------------------------------------------
+
 For more info, please read the user manual
