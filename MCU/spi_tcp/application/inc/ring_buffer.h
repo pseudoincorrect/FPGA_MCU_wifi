@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "dbg.h"
-
 /////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct
@@ -40,6 +39,6 @@ void        RingBuffer_commitRead    (RingBuffer *buffer);
 int         RingBuffer_write         (RingBuffer *buffer, char *target, int amount);
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void        RingBuffer_commitWrite   (RingBuffer *buffer);
+int        RingBuffer_commitWrite   (RingBuffer *buffer);
 
 #endif

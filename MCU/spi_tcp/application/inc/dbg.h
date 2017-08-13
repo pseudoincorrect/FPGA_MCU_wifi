@@ -4,8 +4,6 @@
 #include <string.h>
 #include "uart_if.h"
 
-// __file__
-
 #ifdef NO_DEBUG
 
 #define DBG_debug(M, ...)
@@ -19,6 +17,8 @@
 
 #else
 
+// function to realise a ASSERT type test, and output the function, line number and a 
+// formated string on the debug terminal
 #define DBG_debug(M, ...)     Report("[DEBUG] %s() %d : " M "\n\r",__func__,__LINE__, ##__VA_ARGS__)
 
 #define DBG_log_err(M, ...)   Report("[ERROR] %s() %d : " M "\n\r",__func__,__LINE__, ##__VA_ARGS__)
@@ -34,7 +34,6 @@
 
 #endif
 
-// GPIOPinWrite(GPIOA2_BASE, 1 << 0x06, 1 << 0x06);
-// GPIOPinWrite(GPIOA2_BASE, 1 << 0x06, 0x00);
+// __file__      __func__      __LINE__
 
 #endif /* DBG_H_ */
