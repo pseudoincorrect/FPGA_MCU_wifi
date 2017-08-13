@@ -241,7 +241,7 @@ always @ (current_state or spi_done or fifo_ready or
 				frame_cnt_next = frame_cnt_reg;
 				fifo_re        = 1'b1;
 				next_state     = state_get_data;
-			end 
+			end
 			else begin
 				next_state = state_get_last;
 			end

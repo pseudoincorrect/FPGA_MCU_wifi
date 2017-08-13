@@ -14,7 +14,7 @@ module top (
 	output [6:0]  HEX0,HEX1,HEX2,HEX3,HEX4,HEX5,HEX6,HEX7,  // Seven Segment Digits
 	output [8:0]  LEDG,  //	LED Green
 	output [17:0] LEDR,  //	LED Red
-	output [35:0] GPIO	//	GPIO Connections
+	inout  [35:0]  GPIO	//	GPIO Connections
   	);
 
 parameter 	state_rst         = 4'd0, 		 
@@ -43,6 +43,7 @@ wire dout;
 wire sck;
 wire ss;
 wire send_data;
+wire spi_block;
 wire [31:0] din;
 reg  we;
 // Seven segment display
@@ -77,7 +78,7 @@ fifo_spi fifo_spi_i (
 		.din	(din),
 		.dout 	(dout),
 		.sck  	(sck),
-		.ss   	(ss),
+		.ss   	(ss)
 		);
 
 //Seven segment display
@@ -114,6 +115,8 @@ assign GPIO[0]   = sck;
 assign GPIO[1]   = dout;
 assign GPIO[2]   = ss;
 assign GPIO[3]	 = tick;
+assign GPIO[35:4] = {32{1'bz}};
+assign spi_block = GPIO[35];
 // State Machine
 assign delay_cnt_plus_one = delay_cnt + 32'b1;
 assign data_cnt_plus_one  = data_cnt +  32'b1;
@@ -127,7 +130,6 @@ assign number_5 = 5'h1_0;
 assign number_6 = 5'h1_0;
 assign number_7 = 5'h1_0;
 // default values
-assign GPIO[35:4] = 0;
 assign LEDR       = 0;
 assign LEDG       = 0;
 
@@ -186,7 +188,7 @@ end
 
 
 // FSM combinationnal in/out
-always @ (current_state or send_data or delay_cnt or delay) begin
+always @ (current_state or send_data or delay_cnt or delay or spi_block) begin
 	
 	next_state = current_state;
 	we         = 1'b0;
@@ -206,7 +208,7 @@ always @ (current_state or send_data or delay_cnt or delay) begin
 		end 
 
 		state_delay : begin
-			if (delay_cnt >= delay) begin
+			if ( (delay_cnt >= delay) && (!spi_block) ) begin
 				next_state = state_start_send;
 			end
 		end
