@@ -1,3 +1,25 @@
+//*****************************************************************************
+// Copyright 2017 Maxime Clement
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to
+// do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//*****************************************************************************
+
 #include "ring_buffer.h"
 
 //*********************************************************************
@@ -305,7 +327,32 @@ int RingBuffer_commitWrite(RingBuffer *buffer)
 }
 
 
+/* 8888b. 88888888888     d8888 88888888888     8888888b. 8888888  .d8888b.
+d88P  Y88b    888        d88888     888         888  "Y88b  888   d88P  Y88b
+Y88b.         888       d88P888     888         888    888  888   Y88b.
+ "Y888b.      888      d88P 888     888         888    888  888    "Y888b.
+    "Y88b.    888     d88P  888     888         888    888  888       "Y88b.
+      "888    888    d88P   888     888         888    888  888         "888
+Y88b  d88P    888   d8888888888     888         888  .d88P  888   Y88b  d88P
+ "Y8888P"     888  d88P     888     888         8888888P" 8888888  "Y8888*/
 
+//****************************************************************************
+//
+//!     \brief This function displays the status of a Ringbuffer
+//!     it displays the read and write indexes, and the amount of data avail.
+//!
+//!     \param[in] Pointer to a RingBuffer
+//!
+//!     \return None
+//
+//****************************************************************************
+void BufferStatusDisplay(RingBuffer *buffer)
+{
+    DBG_debug("\n\rRingBuffer Status\n\r");
+    DBG_debug("RingBuffer available data = %d\n\r", RingBuffer_availableData(buffer));
+    DBG_debug("RingBuffer read_index = %d\n\r",     buffer->read_index);
+    DBG_debug("RingBuffer write_index = %d\n\r",    buffer->write_index);
+}
 
 
 

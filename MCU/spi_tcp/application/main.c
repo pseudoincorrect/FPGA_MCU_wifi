@@ -1,36 +1,23 @@
 //*****************************************************************************
+// Copyright 2017 Maxime Clement
 //
-// Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/ 
-// 
-// 
-//  Redistribution and use in source and binary forms, with or without 
-//  modification, are permitted provided that the following conditions 
-//  are met:
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to
+// do so, subject to the following conditions:
 //
-//    Redistributions of source code must retain the above copyright 
-//    notice, this list of conditions and the following disclaimer.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-//    Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the 
-//    documentation and/or other materials provided with the   
-//    distribution.
-//
-//    Neither the name of Texas Instruments Incorporated nor the names of
-//    its contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 //*****************************************************************************
 
 //*****************************************************************************
@@ -97,6 +84,12 @@
 // application includes
 #include "common_app.h"
 #include "net_app.h"
+#include "ring_buffer.h"
+#include "gpio_app.h"
+#include "uart_app.h"
+#include "timer_app.h"
+#include "spi_app.h"
+#include "watchdog_app.h"
 
 
 #undef  USER_INPUT_ENABLE
@@ -106,29 +99,26 @@
 
 #define BUF_SIZE_RX         64
 #define RECV_LOOP_DIVIDER   50
-#if (FAKE_DATA)
+#if FAKE_DATA
 #define END_OF_FRAME        0x34120000 // for data created by timer (for tests)
 #else
 #define END_OF_FRAME        0x00001234 // for SPI data
 #endif
 #define INTERNET 1
-#define FAKE_DATA 0
 
 //****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
 //****************************************************************************
-static int  TransmissionTCP(void);
-static void SpiInterruptHandler(void);
-void GpioIntHandler(void);
-static void SpiDmaInitTransfer();
-static void WatchdogIntHandler(void);
-void SpiDmaInitTransfer(void);
-void ReinitializeDMA(void);
-void DeinitDmaSpi(void);
-static void InitApp(void);
-#if (FAKE_DATA)
-static void TimerBaseIntHandler(void)
-static void Timer_init(void);
+static int  TransmissionTCP     (void);
+static int  main_acquisition_transfert(void);
+static void SpiInterruptHandler (void);
+void        GpioIntHandler      (void);
+static void WatchdogIntHandler  (void);
+static void InitApp             (void);
+
+#if FAKE_DATA
+static void TimerBaseIntHandler(void);
+static void CreateFakeData(void);
 #endif
 
 //*****************************************************************************
@@ -137,15 +127,13 @@ static void Timer_init(void);
 volatile tBoolean       g_bFeedWatchdog = true;
 static unsigned long    ulRecvData_a [DMA_SIZE_WORD];
 static unsigned long    ulRecvData_b [DMA_SIZE_WORD];
-static volatile int     semaphore_counter;
-static volatile int     spi_block_semaphore;
+static volatile int     tcp_send_semaphore_cnt;
 static char             pre_Tx_buff  [MAX_TCP_SIZE_BYTE];
 static char             tx_Buff      [MAX_TCP_SIZE_BYTE];
 static RingBuffer       *R_buffer;
-#if (FAKE_DATA)
+#if FAKE_DATA
 static volatile unsigned long g_ulFakeData;
 static volatile unsigned long BaseTimer;
-static char ledToggle;
 #endif
 
 
@@ -166,7 +154,6 @@ extern void (* const g_pfnVectors[])(void);
 888       888 d88P     888 8888888 888    Y8*/
 
 void main()
-
 {
     long lRetVal = -1;
 
@@ -174,9 +161,6 @@ void main()
 
     // Initialize all variables
     InitializeNetAppVariables();
-
-    // Board Initialization
-    init();
 
     // init buffer and variables
     InitApp();
@@ -248,11 +232,7 @@ void main()
 //!     This is one of the two the main routines of this Application. 
 //!     This function opens a TCP socket and tries to connect to a 
 //!     Server IP_ADDR waiting on port PORT_NUM with net_app functions.
-//!     It checks by polling if there are new data available on the RingBuffer 
-//!     and send them in the positive case. Data are added to the ringBuffer 
-//!     through the SPI interrupt handler. the semaphores are used to detect
-//!     Wether the socket_send() function get stuck (due to wifi, TCP/IP protocols)
-//!     Which happen often in a normal case.
+//!
 //!
 //!     \param[in]  None
 //!
@@ -262,8 +242,6 @@ void main()
 static int TransmissionTCP(void)
 {
     int iStatus;
-    short BuffFillLen;
-    void *result;
 
     iStatus = TcpClientConnect();
     watchDogAck(); // Few more seconds before reset if the watchdog is not fed
@@ -274,64 +252,29 @@ static int TransmissionTCP(void)
     iStatus = net_send_data(pre_Tx_buff, 8);
     DBG_check(iStatus >= 0, "SEND_ERROR (first transmission) error: %d", iStatus);
 
+
+
+    #if FAKE_DATA
+    Timer_init(TimerBaseIntHandler);
+    g_ulFakeData = 0;
+    #else
     // configure SPI DMA
-    SpiDmaInitTransfer();
+    SpiDmaInitTransfer(SpiInterruptHandler,
+                       ulRecvData_a,
+                       ulRecvData_b);
     SpiUnblock();
+    #endif
 
     UART_PRINT("Entering infinite sending loop\n\r");
 
-    // init the timer interrupt for testing the system without a SPI peripheral
-    //Timer_init();
-
-    // loop that send data over TCP when the buffer is ready
-    while (1)
-    {
-        // Check if data are available in the RingBuffer
-        BuffFillLen = RingBuffer_availableData(R_buffer);
-        watchDogAck(); // Few more seconds before reset if the watchdog is not fed
-
-        // send data if there are
-        if (BuffFillLen > 0)
-        {
-            RingBuffer_read(R_buffer, pre_Tx_buff, sizeof(pre_Tx_buff));
-
-            RingBuffer_commitRead(R_buffer);
-
-            result = memcpy(tx_Buff,
-                            pre_Tx_buff,
-                            MAX_TCP_SIZE_BYTE - 4);
-
-            DBG_check(result != NULL, "Failed to write buffer into data.");
-
-            // logic analyzer to measure and periodicity of net_send_data()
-            DebugPinSet(PIN_60, 1);
-
-            iStatus = net_send_data(tx_Buff, MAX_TCP_SIZE_BYTE - 4);
-            watchDogAck(); // Few more seconds before reset if the watchdog is not fed
-
-            DebugPinSet(PIN_60, 0);
-
-            // Keep the SPI enable on the FPGA side since the send function worked
-            SpiUnblock();
-
-            // Used in Spi interrup handler to check weither the send funcion
-            // got stuck due wifi TCP/IP protocol (data collisions)
-            semaphore_counter++;
-
-            // Check weither all data have been sent or weither an error occured
-            DBG_check(iStatus == (MAX_TCP_SIZE_BYTE - 4), 
-                      "SEND_ERROR (main transmission) error: %d",
-                      iStatus);
-        }
-    }
+    iStatus = main_acquisition_transfert();
+    // if we are here, there is an error, most likely a connexion closed
 
     // We arrive in here usually when the Connection with the server
     // has been interrupted.
     error:
 
-    DebugPulse(PIN_15, 100); // out pulse for logic analyzer
     UART_PRINT("DEinitialising SPI DMA\n\r");
-
     DeinitDmaSpi();
 
     UART_PRINT("Closing socket\n\r");
@@ -343,6 +286,90 @@ static int TransmissionTCP(void)
 
     return FAILURE;
 }
+
+
+
+/*8b     d888        d8888 8888888 888b    888            d8888  .d8888b.   .d88888b.
+8888b   d8888       d88888   888   8888b   888           d88888 d88P  Y88b d88P" "Y88b
+88888b.d88888      d88P888   888   88888b  888          d88P888 888    888 888     888
+888Y88888P888     d88P 888   888   888Y88b 888         d88P 888 888        888     888
+888 Y888P 888    d88P  888   888   888 Y88b888        d88P  888 888        888     888
+888  Y8P  888   d88P   888   888   888  Y88888       d88P   888 888    888 888 Y8b 888
+888   "   888  d8888888888   888   888   Y8888      d8888888888 Y88b  d88P Y88b.Y8b88P
+888       888 d88P     888 8888888 888    Y888     d88P     888  "Y8888P"   "Y888888"
+                                                                                  Y*/
+//****************************************************************************
+//
+//!     \brief Main acquisition/transmission routine
+//!     It checks by polling if there are new data available on the RingBuffer
+//!     and send them in the positive case. Data are added to the ringBuffer
+//!     through the SPI interrupt handler. the semaphores are used to detect
+//!     Wether the socket_send() function get stuck (due to wifi, TCP/IP protocols)
+//!     Which happen often in a normal case.
+//!
+//!     \param[in]  None
+//!
+//!     \return    -1  when the TCP connection is interrupted.
+//
+//****************************************************************************
+int main_acquisition_transfert(void)
+{
+    int iStatus;
+    short BuffFillLen;
+    void *result;
+
+    // loop that send data over TCP when the buffer is ready
+   while (1)
+   {
+       // Check if data are available in the RingBuffer
+       BuffFillLen = RingBuffer_availableData(R_buffer);
+       watchDogAck(); // Few more seconds before reset if the watchdog is not fed
+
+       // send data if there are
+       if (BuffFillLen > 0)
+       {
+           RingBuffer_read(R_buffer, pre_Tx_buff, sizeof(pre_Tx_buff));
+
+           RingBuffer_commitRead(R_buffer);
+
+           result = memcpy(tx_Buff,
+                           pre_Tx_buff,
+                           MAX_TCP_SIZE_BYTE - 4);
+
+           DBG_check(result != NULL, "Failed to write buffer into data.");
+
+           // logic analyzer to measure and periodicity of net_send_data()
+           DebugPinSet(PIN_60, 1);
+
+           iStatus = net_send_data(tx_Buff, MAX_TCP_SIZE_BYTE - 4);
+           watchDogAck(); // Few more seconds before reset if the watchdog is not fed
+
+           DebugPinSet(PIN_60, 0);
+
+           // Keep the SPI enable on the FPGA side since the send function worked
+           SpiUnblock();
+
+           // Used in Spi interrup handler to check weither the send funcion
+           // got stuck due wifi TCP/IP protocol (data collisions)
+           tcp_send_semaphore_cnt++;
+
+           // Check weither all data have been sent or weither an error occured
+           DBG_check(iStatus == (MAX_TCP_SIZE_BYTE - 4),
+                     "SEND_ERROR (main transmission) error: %d",
+                     iStatus);
+       }
+   }
+
+   // We arrive in here usually when the Connection with the server
+   // has been interrupted.
+   error:
+
+   UART_PRINT("Main acquisition/transfert loop error \n\r");
+
+   return FAILURE;
+}
+
+
 
 
 /*8888b.  8888888b. 8888888     8888888 888b    888 88888888888
@@ -382,7 +409,7 @@ Y88b  d88P 888         888         888   888   Y8888     888
 static void SpiInterruptHandler()
 {
     static int spi_block_counter;
-    static int prev_semaphore_counter;
+    static int prev_tcp_send_semaphore_cnt;
     unsigned long ulStatus;
     unsigned long ulMode;
 
@@ -399,14 +426,13 @@ static void SpiInterruptHandler()
         ulMode = uDMAChannelModeGet(UDMA_CH30_GSPI_RX | UDMA_PRI_SELECT);
 
         // Detection of the socket_send() fucntion blockage
-        if (prev_semaphore_counter == semaphore_counter)
+        if (prev_tcp_send_semaphore_cnt == tcp_send_semaphore_cnt)
         {
             spi_block_counter++;
             // We block the SPI when we receive SPI_BLOCK_COUNTER spi frame
             // and that the send function is still stuck
             if (spi_block_counter > SPI_BLOCK_COUNTER)
             {
-                spi_block_semaphore = 1;
                 SpiBlock();
                 LedSet(1, 1);
             }
@@ -414,11 +440,10 @@ static void SpiInterruptHandler()
         else
         {
             spi_block_counter = 0;
-            spi_block_semaphore = 0;
             SpiUnblock();
             LedSet(1, 0);
         }
-        prev_semaphore_counter = semaphore_counter;
+        prev_tcp_send_semaphore_cnt = tcp_send_semaphore_cnt;
 
         if(ulMode == UDMA_MODE_STOP)
         {
@@ -429,7 +454,7 @@ static void SpiInterruptHandler()
             // If not, it means that our SPI clock is desychronised
             // It happens because of electrical interference in the linked wires.
             // We resynchronize the SPI by waiting until the end of the transmission
-            // (until Nss become HIGH again) by restarting it with ReinitializeDMA()
+            // (until Nss become HIGH again) by restarting it with ReinitializeSpiDma()
             if ( ! (ulRecvData_a[sizeof(ulRecvData_a) / sizeof(uint32_t) - 1] 
                 == END_OF_FRAME))
             {
@@ -437,7 +462,9 @@ static void SpiInterruptHandler()
                 while (! SpiNssRead())
                 {;}
 
-                ReinitializeDMA();
+                ReinitializeSpiDma(SpiInterruptHandler,
+                                ulRecvData_a,
+                                ulRecvData_b);
 
                 // nSS low means that the "low time" of the spi is to short for the 
                 // MCU to keep up with the data rate SPI, we need to lower it
@@ -468,7 +495,9 @@ static void SpiInterruptHandler()
                 while (! SpiNssRead())
                 {;}
 
-                ReinitializeDMA();
+                ReinitializeSpiDma(SpiInterruptHandler,
+                                ulRecvData_a,
+                                ulRecvData_b);
 
                 // nSS low means that we "low time" of the spi is to short
                 if (! SpiNssRead())
@@ -493,7 +522,7 @@ static void SpiInterruptHandler()
     }
 }
 
-#if (FAKE_DATA)
+#if FAKE_DATA
 
 /*888{888888 8888888 888b     d888 8888888888 8888888b.
     888       888   8888b   d8888 888        888   Y88b
@@ -518,28 +547,31 @@ static void SpiInterruptHandler()
 // Handler for the Timer interrupt
 static void TimerBaseIntHandler(void)
 {
-    int i;
+    static int timer_block_counter;
+    static int prev_tcp_send_semaphore_cnt;
 
     // Clear the timer interrupt.
     Timer_IF_InterruptClear(BaseTimer);
+    CreateFakeData();
 
-    for (i = 0; i < 255; i++)
-        ulRecvData_a[i] = g_ulFakeData++;
-
-    ulRecvData_a[255] = 0x12340000;
-
-    RingBuffer_write(R_buffer,
-                     (char*) (ulRecvData_a),
-                     sizeof(ulRecvData_a));
-
-    RingBuffer_commitWrite(R_buffer);
-
-    if (ledToggle)
-        LedSet(LED1, ON);
-    else
-        LedSet(LED1, OFF);
-
-   ledToggle = ~ledToggle;
+//    // Detection of the socket_send() fucntion blockage
+//    if (prev_tcp_send_semaphore_cnt == tcp_send_semaphore_cnt)
+//    {
+//        timer_block_counter++;
+//        // We block the SPI when we receive SPI_BLOCK_COUNTER spi frame
+//        // and that the send function is still stuck
+//        if (timer_block_counter > TIMER_BLOCK_COUNTER)
+//            LedSet(1, 1);
+//        else
+//            CreateFakeData();
+//    }
+//    else
+//    {
+//        CreateFakeData();
+//        timer_block_counter = 0;
+//        LedSet(1, 0);
+//    }
+//    prev_tcp_send_semaphore_cnt = tcp_send_semaphore_cnt;
 }
 #endif
 
@@ -605,107 +637,15 @@ static void WatchdogIntHandler(void)
 
 
 
-/*8888b.  8888888b. 8888888     8888888 888b    888 8888888 88888888888
-d88P  Y88b 888   Y88b  888         888   8888b   888   888       888
-Y88b.      888    888  888         888   88888b  888   888       888
- "Y888b.   888   d88P  888         888   888Y88b 888   888       888
-    "Y88b. 8888888P"   888         888   888 Y88b888   888       888
-      "888 888         888         888   888  Y88888   888       888
-Y88b  d88P 888         888         888   888   Y8888   888       888
- "Y8888P"  888       8888888     8888888 888    Y888 8888888     8*/
 
-//****************************************************************************
-//
-//!     \brief SPI DMA Initialisation
-//!     This function initialize the SPI and the DMA peripheral and start
-//!     a first transfert to enable the DMA controller
-//!
-//!     \param[in] None
-//!
-//!     \return  None
-//
-//****************************************************************************
-void SpiDmaInitTransfer(void)
-{
-    // Set up the SPI FIFO DMA
-    Spiconf(SpiInterruptHandler);
-
-    SpiDmaTransfer(PRIMARY_BUFFER, ulRecvData_a, DMA_SIZE_WORD);
-
-    SpiDmaTransfer(ALTERNATIVE_BUFFER, ulRecvData_b, DMA_SIZE_WORD);
-
-    SPIEnable(GSPI_BASE);
-}
-
-
-/*88888b.   .d8888b. 88888888888     8888888b.  888b     d888        d8888
-888   Y88b d88P  Y88b    888         888  "Y88b 8888b   d8888       d88888
-888    888 Y88b.         888         888    888 88888b.d88888      d88P888
-888   d88P  "Y888b.      888         888    888 888Y88888P888     d88P 888
-8888888P"      "Y88b.    888         888    888 888 Y888P 888    d88P  888
-888 T88b         "888    888         888    888 888  Y8P  888   d88P   888
-888  T88b  Y88b  d88P    888         888  .d88P 888   "   888  d8888888888
-888   T88b  "Y8888P"     888         8888888P"  888       888 d88P     8*/
-
-//****************************************************************************
-//
-//!     \brief  This function is used to reinit the DMA controller.
-//!     It is usually  trigger when the TCP connection fail and that we need
-//!     to restart fully the system
-//!
-//!     \param[in] None
-//!
-//!     \return None
-//
-//****************************************************************************
-void ReinitializeDMA(void)
-{
-    UDMADeInit();
-    SpiDmaInitTransfer();
-
-    SPIEnable(GSPI_BASE);
-}
-
-
-/*88888b.  8888888888     8888888b.  888b     d888        d8888
-888  "Y88b 888            888  "Y88b 8888b   d8888       d88888
-888    888 888            888    888 88888b.d88888      d88P888
-888    888 8888888        888    888 888Y88888P888     d88P 888
-888    888 888            888    888 888 Y888P 888    d88P  888
-888    888 888            888    888 888  Y8P  888   d88P   888
-888  .d88P 888            888  .d88P 888   "   888  d8888888888
-8888888P"  8888888888     8888888P"  888       888 d88P     8*/
-
-//****************************************************************************
-//
-//!     \brief  This function is used to start Disable the DMA controller
-//!     and its interrupts
-//!
-//!     \param[in]
-//!
-//!     \return
-//
-//****************************************************************************
-void DeinitDmaSpi(void)
-{
-    SPIDisable(GSPI_BASE);
-    SPIDmaDisable(GSPI_BASE, SPI_RX_DMA);
-
-    SPIIntDisable(GSPI_BASE, SPI_INT_DMARX);
-    SPIIntUnregister(GSPI_BASE);
-
-    SPIReset(GSPI_BASE);
-}
-
-
-/*     d8888 8888888b.  8888888b.      888     888      d8888 8888888b.
-      d88888 888   Y88b 888   Y88b     888     888     d88888 888   Y88b
-     d88P888 888    888 888    888     888     888    d88P888 888    888
-    d88P 888 888   d88P 888   d88P     Y88b   d88P   d88P 888 888   d88P
-   d88P  888 8888888P"  8888888P"       Y88b d88P   d88P  888 8888888P"
-  d88P   888 888        888              Y88o88P   d88P   888 888 T88b
- d8888888888 888        888               Y888P   d8888888888 888  T88b
-d88P     888 888        888                Y8P   d88P     888 888   T8*/
+/*88888 888b    888 8888888 88888888888
+  888   8888b   888   888       888
+  888   88888b  888   888       888
+  888   888Y88b 888   888       888
+  888   888 Y88b888   888       888
+  888   888  Y88888   888       888
+  888   888   Y8888   888       888
+8888888 888    Y888 8888888     8*/
 
 //****************************************************************************
 //
@@ -719,14 +659,15 @@ d88P     888 888        888                Y8P   d88P     888 888   T8*/
 static void InitApp(void)
 {
     int iCounter;
-    semaphore_counter = 0;
+    tcp_send_semaphore_cnt = 0;
 
-    LedSet (LED1, OFF);
-    LedSet (LED2, OFF);
-    LedSet (LED3, OFF);
+    common_init();
+    watchdog_init(WatchdogIntHandler);
+    uart_init();
 
-    // Init the watchdog
-    WDT_IF_Init(WatchdogIntHandler, MILLISECONDS_TO_TICKS(WD_PERIOD_MS));
+    #if FAKE_DATA
+    Timer_init();
+    #endif
 
     // init the Ring buffer
     R_buffer = RingBuffer_create(BUFFER_SIZE, DMA_SIZE_WORD * sizeof(uint32_t));
@@ -734,7 +675,34 @@ static void InitApp(void)
     // filling the buffers Tx and Rx
     for (iCounter = 0; iCounter < sizeof(pre_Tx_buff); iCounter++)
         pre_Tx_buff[iCounter] =  '\0';
+
+    LedSet (LED1, OFF);
+    LedSet (LED2, OFF);
+    LedSet (LED3, OFF);
 }
+
+
+#if FAKE_DATA
+static void CreateFakeData(void)
+{
+    int i;
+
+    for (i = 0; i < 255; i++)
+        ulRecvData_a[i] = g_ulFakeData++;
+
+    ulRecvData_a[255] = END_OF_FRAME;
+
+    RingBuffer_write(R_buffer,
+                     (char*) (ulRecvData_a),
+                     sizeof(ulRecvData_a));
+
+    RingBuffer_commitWrite(R_buffer);
+}
+#endif
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>spi_tcp</name>
+	<name>Fpga_wifi_link</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,29 +26,39 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>CC3200.ccxml</name>
-			<type>1</type>
-			<location>C:/Users/max/ti/CCSTargetConfigurations/CC3200.ccxml</location>
-		</link>
-		<link>
-			<name>network_common.c</name>
+			<name>linked_files/network_common.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-ORIGINAL_PROJECT_ROOT/common/network_common.c</locationURI>
 		</link>
 		<link>
-			<name>startup_ccs.c</name>
+			<name>linked_files/startup_ccs.c</name>
 			<type>1</type>
 			<locationURI>CC3200_SDK_ROOT/example/common/startup_ccs.c</locationURI>
 		</link>
 		<link>
-			<name>uart_if.c</name>
+			<name>linked_files/timer_if.c</name>
+			<type>1</type>
+			<locationURI>PARENT-7-PROJECT_LOC/ti/cc3200_sdk/cc3200-sdk/example/common/timer_if.c</locationURI>
+		</link>
+		<link>
+			<name>linked_files/uart_if.c</name>
 			<type>1</type>
 			<locationURI>CC3200_SDK_ROOT/example/common/uart_if.c</locationURI>
 		</link>
 		<link>
-			<name>udma_if.c</name>
+			<name>linked_files/udma_if.c</name>
 			<type>1</type>
 			<locationURI>CC3200_SDK_ROOT/example/common/udma_if.c</locationURI>
+		</link>
+		<link>
+			<name>linked_files/wdt_if.c</name>
+			<type>1</type>
+			<locationURI>PARENT-7-PROJECT_LOC/ti/cc3200_sdk/cc3200-sdk/example/common/wdt_if.c</locationURI>
+		</link>
+		<link>
+			<name>targetConfigs/CC3200.ccxml</name>
+			<type>1</type>
+			<location>C:/Users/max/ti/CCSTargetConfigurations/CC3200.ccxml</location>
 		</link>
 	</linkedResources>
 	<variableList>
