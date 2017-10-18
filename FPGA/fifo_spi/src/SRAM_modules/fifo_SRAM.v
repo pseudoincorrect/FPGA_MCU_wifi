@@ -1,8 +1,30 @@
-// Fifo implemented on a single port SRAM
-// Due to the single port, the write operation
-// has been implementd witht the priority on the read operation
-// the pre write signal indicate the reader has to wait for one
-// clock cycle before reading the fifo. 
+/*8888b.  8888888b.         d8888 888b     d888          
+d88P  Y88b 888   Y88b       d88888 8888b   d8888         
+Y88b.      888    888      d88P888 88888b.d88888         
+ "Y888b.   888   d88P     d88P 888 888Y88888P888         
+    "Y88b. 8888888P"     d88P  888 888 Y888P 888         
+      "888 888 T88b     d88P   888 888  Y8P  888         
+Y88b  d88P 888  T88b   d8888888888 888   "   888         
+ "Y8888P"  888   T88b d88P     888 888       888
+
+ 8888888888 8888888 8888888888  .d88888b.  
+ 888          888   888        d88P" "Y88b 
+ 888          888   888        888     888 
+ 8888888      888   8888888    888     888 
+ 888          888   888        888     888 
+ 888          888   888        888     888 
+ 888          888   888        Y88b. .d88P 
+ 888        8888888 888         "Y88888*/
+
+/////////////////////////////////////////////////////////////////////
+// Fifo implemented on a single port SRAM. Due to the single port, 
+// the write operation and read operation have to be scheduled
+// The catch write and catch read state are taking care of that point
+// to sequentially write and read in case of simultaneous request 
+// from the writting and reading devices. The busy signal indicate
+// that the fifo won't accept any write or read request. the writter 
+// and reader device have to consider the busy signal.
+/////////////////////////////////////////////////////////////////////
 
 module fifo_SRAM(
 	// common
@@ -47,8 +69,17 @@ module fifo_SRAM(
 	parameter MUX_SRAM_TO_FPGA = 1'b0; // tristate parameter sram data
 
 	// max size 1024*1024 halfwords (16 bits) with a margin of 4'hF (F_FFFF - 0_000F)
-	// parameter BUFFER_SIZE = 21'h 00_1000; // = 2^20 (or 1 << 20) = 2 MB
 	parameter BUFFER_SIZE = 21'b 1_0000_0000_0000_0000_0000; // = 2^20 (or 1 << 20) = 2 MB
+
+
+	/*88888b.  8888888888  .d8888b.  888      
+	888  "Y88b 888        d88P  Y88b 888      
+	888    888 888        888    888 888      
+	888    888 8888888    888        888      
+	888    888 888        888        888      
+	888    888 888        888    888 888      
+	888  .d88P 888        Y88b  d88P 888      
+	8888888P"  8888888888  "Y8888P"  888888*/ 
 
 	reg [3:0]  	next_state;
 	reg [19:0] 	read_addr;
@@ -68,7 +99,14 @@ module fifo_SRAM(
 	wire 		rollback_re;
 
 
-	// altera_tristate_iobuf_bidir_p1p tristate_sram (IO_to_SRAM, IO, IO_from_SRAM, out_enable);
+		   /*888  .d8888b.   .d8888b. 8888888  .d8888b.  888b    888 
+	      d88888 d88P  Y88b d88P  Y88b  888   d88P  Y88b 8888b   888 
+	     d88P888 Y88b.      Y88b.       888   888    888 88888b  888 
+	    d88P 888  "Y888b.    "Y888b.    888   888        888Y88b 888 
+	   d88P  888     "Y88b.     "Y88b.  888   888  88888 888 Y88b888 
+	  d88P   888       "888       "888  888   888    888 888  Y88888 
+	 d8888888888 Y88b  d88P Y88b  d88P  888   Y88b  d88P 888   Y8888 
+	d88P     888  "Y8888P"   "Y8888P" 8888888  "Y8888P88 888    Y8*/
 
 
 	assign rollback_we = (write_addr == 20'hF_FFFF) ? 1'b1 : 1'b0;
@@ -81,8 +119,6 @@ module fifo_SRAM(
 	// IO tri-state		write to RAM ?			  write to RAM	   High imp for reading from RAM
 	assign IO   = (DAT_MUX == MUX_FPGA_TO_SRAM) ? IO_to_SRAM : 16'bzzzz_zzzz_zzzz_zzzz;
 	assign IO_from_SRAM =  IO;
-	// assign out_enable = (DAT_MUX == MUX_FPGA_TO_SRAM) ? 16'hFFFF : 16'h0;
-	// assign out_enable = (DAT_MUX == MUX_FPGA_TO_SRAM) ? 16'h0: 16'hFFFF;
 
 	assign CE_n = 0; // Chip   enable_n
 	assign UB_n = 0; // Upper Byte Control
@@ -91,6 +127,15 @@ module fifo_SRAM(
 	// Data out Reg (to Read from RAM)
 	assign dataOut = data_IO_out_reg;
 
+
+	/*88888b.  8888888888  .d8888b.  
+	888   Y88b 888        d88P  Y88b 
+	888    888 888        888    888 
+	888   d88P 8888888    888        
+	8888888P"  888        888  88888 
+	888 T88b   888        888    888 
+	888  T88b  888        Y88b  d88P 
+	888   T88b 8888888888  "Y8888P*/
 
 	// full reg
 	always @(posedge clk or negedge rst_n) begin

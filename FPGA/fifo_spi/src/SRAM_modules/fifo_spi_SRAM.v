@@ -12,14 +12,10 @@
 /////////////////////////////////////////////////////////////////////
 // This module realise the connexion and control between a fifo 
 // and a SPI module. 
-// workflow: It accepts 32 bits data in, and store them in a fifo.
+// workflow: It accepts 32 bits data in, and store them in a fifo implementd
+// one a SRAM chip.
 // at the moment the fifo reach 255 data in, the spi module start
-// to output these 255 data plus 1 word (end frame data).
-//
-// FUTURE WORK: Implement a SPI block signal that will block 
-// 			  	the SPI. Meanwhile, we keep putting the "data in" 
-//				in the fifo until the SPI unblock and transmitt data. 
-// 			  	Implement a fifo overflow signal
+// to output these 255 data words plus 1 word of frame ending data.
 /////////////////////////////////////////////////////////////////////
 
 
@@ -75,14 +71,14 @@ module fifo_spi_sram (clk, nrst, block, we, din, dout, fifo_busy, fifo_full, sck
 	parameter MINIMUM_DELAY   = 32'd31111;
 
 
-	/*8       888 8888888 8888888b.  8888888888  .d8888b.   
-	888   o   888   888   888   Y88b 888        d88P  Y88b  
-	888  d8b  888   888   888    888 888        Y88b.       
-	888 d888b 888   888   888   d88P 8888888     "Y888b.    
-	888d88888b888   888   8888888P"  888            "Y88b.  
-	88888P Y88888   888   888 T88b   888              "888  
-	8888P   Y8888   888   888  T88b  888        Y88b  d88P  
-	888P     Y888 8888888 888   T88b 8888888888  "Y8888*/  
+	/*88888b.  8888888888  .d8888b.  888      
+	888  "Y88b 888        d88P  Y88b 888      
+	888    888 888        888    888 888      
+	888    888 8888888    888        888      
+	888    888 888        888        888      
+	888    888 888        888    888 888      
+	888  .d88P 888        Y88b  d88P 888      
+	8888888P"  8888888888  "Y8888P"  888888*/  
 
 	// General
 	wire clk;
