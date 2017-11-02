@@ -1,0 +1,3 @@
+port = 5001
+packet_count = 10000
+received_data_path = ../received_data/received_data_0.dat

@@ -1,0 +1,44 @@
+
+**** Build of configuration Release for project spi_tcp ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k all 
+'Building file: C:/ti/cc3200_sdk/cc3200-sdk/example/common/timer_if.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="timer_if.d"  "C:/ti/cc3200_sdk/cc3200-sdk/example/common/timer_if.c"
+'Finished building: C:/ti/cc3200_sdk/cc3200-sdk/example/common/timer_if.c'
+' '
+'Building file: C:/ti/cc3200_sdk/cc3200-sdk/example/common/wdt_if.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="wdt_if.d"  "C:/ti/cc3200_sdk/cc3200-sdk/example/common/wdt_if.c"
+'Finished building: C:/ti/cc3200_sdk/cc3200-sdk/example/common/wdt_if.c'
+' '
+'Building file: ../application/main.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="application/main.d" --obj_directory="application"  "../application/main.c"
+'Finished building: ../application/main.c'
+' '
+'Building file: ../application/src/common_app.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="application/src/common_app.d" --obj_directory="application/src"  "../application/src/common_app.c"
+'Finished building: ../application/src/common_app.c'
+' '
+'Building file: ../application/src/net_app.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="application/src/net_app.d" --obj_directory="application/src"  "../application/src/net_app.c"
+'Finished building: ../application/src/net_app.c'
+' '
+'Building file: ../application/src/ring_buffer.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/inc" --include_path="C:/Users/max/programming/C/codeComposer/test_wlan/spi_tcp/application/src" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink/source" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/simplelink_extlib/provisioninglib" --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi --preproc_with_compile --preproc_dependency="application/src/ring_buffer.d" --obj_directory="application/src"  "../application/src/ring_buffer.c"
+'Finished building: ../application/src/ring_buffer.c'
+' '
+'Building target: spi_tcp.out'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=fpalib -me -Ooff --define=ccs --define=USER_INPUT_ENABLE --define=cc3200 -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"spi_tcp.map" --heap_size=40000 --stack_size=40000 --cinit_hold_wdt=off -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="spi_tcp_linkInfo.xml" --rom_model -o "spi_tcp.out" "./network_common.obj" "./startup_ccs.obj" "./timer_if.obj" "./uart_if.obj" "./udma_if.obj" "./wdt_if.obj" "./application/main.obj" "./application/src/common_app.obj" "./application/src/net_app.obj" "./application/src/ring_buffer.obj" "./application/src/user_main.obj" "../cc3200v1p32.cmd"  -llibc.a -l"C:/ti/cc3200_sdk/cc3200-sdk/simplelink/ccs/NON_OS/simplelink.a" -l"C:/ti/cc3200_sdk/cc3200-sdk/driverlib/ccs/Release/driverlib.a" 
+<Linking>
+'Finished building target: spi_tcp.out'
+' '
+"C:/ti/ccsv7/utils/tiobj2bin/tiobj2bin" "spi_tcp.out" "spi_tcp.bin" "C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armofd" "C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/bin/armhex" "C:/ti/ccsv7/utils/tiobj2bin/mkhex4bin"
+' '
+
+**** Build Finished ****

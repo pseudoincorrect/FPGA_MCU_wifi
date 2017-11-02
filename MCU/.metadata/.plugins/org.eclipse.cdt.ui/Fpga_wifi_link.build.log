@@ -1,0 +1,18 @@
+
+**** Clean-only build of configuration Release for project Fpga_wifi_link ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k clean 
+DEL /F  "Fpga_wifi_link.bin"  "Fpga_wifi_link.out" 
+DEL /F "application\main.obj" "application\src\common_app.obj" "application\src\gpio_app.obj" "application\src\net_app.obj" "application\src\ring_buffer.obj" "application\src\spi_app.obj" "application\src\timer_app.obj" "application\src\uart_app.obj" "application\src\watchdog_app.obj" "linked_files\network_common.obj" "linked_files\startup_ccs.obj" "linked_files\timer_if.obj" "linked_files\uart_if.obj" "linked_files\udma_if.obj" "linked_files\wdt_if.obj" 
+DEL /F "application\main.d" "application\src\common_app.d" "application\src\gpio_app.d" "application\src\net_app.d" "application\src\ring_buffer.d" "application\src\spi_app.d" "application\src\timer_app.d" "application\src\uart_app.d" "application\src\watchdog_app.d" "linked_files\network_common.d" "linked_files\startup_ccs.d" "linked_files\timer_if.d" "linked_files\uart_if.d" "linked_files\udma_if.d" "linked_files\wdt_if.d" 
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\Fpga_wifi_link.bin
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\application\main.obj
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\application\src\common_app.obj
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\linked_files\network_common.obj
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\application\main.d
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\application\src\common_app.d
+Could Not Find C:\Users\max\programming\C\codeComposer\test_wlan\Fpga_wifi_link\Release\linked_files\network_common.d
+'Finished clean'
+' '
+
+**** Build Finished ****

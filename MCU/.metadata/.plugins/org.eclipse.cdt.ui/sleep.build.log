@@ -1,0 +1,19 @@
+
+**** Build of configuration Release for project sleep ****
+
+"C:\\ti\\ccsv7\\utils\\bin\\gmake" -k all 
+'Building file: ../pinmux.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=vfplib --abi=eabi -me --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/example/common" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/driverlib" --include_path="C:/ti/cc3200_sdk/cc3200-sdk/inc" -g --define=ccs --define=NON_NETWORK --define=cc3200 --diag_wrap=off --diag_warning=225 --display_error_number --preproc_with_compile --preproc_dependency="pinmux.d"  "../pinmux.c"
+'Finished building: ../pinmux.c'
+' '
+'Building target: sleep.out'
+'Invoking: ARM Linker'
+"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=vfplib --abi=eabi -me -g --define=ccs --define=NON_NETWORK --define=cc3200 --diag_wrap=off --diag_warning=225 --display_error_number -z -m"sleep.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/lib" -i"C:/ti/cc3200_sdk/cc3200-sdk/driverlib/ccs/Release" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include" --reread_libs --display_error_number --diag_wrap=off --warn_sections --xml_link_info="sleep_linkInfo.xml" --rom_model -o "sleep.out" "./main.obj" "./pinmux.obj" "./startup_ccs.obj" "./timer_if.obj" "./uart_if.obj" "./wdt_if.obj" "../cc3200v1p32.cmd"  -llibc.a -ldriverlib.a 
+<Linking>
+'Finished building target: sleep.out'
+' '
+"C:/ti/ccsv7/utils/tiobj2bin/tiobj2bin" "sleep.out" "sleep.bin" "C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/bin/armofd" "C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/bin/armhex" "C:/ti/ccsv7/utils/tiobj2bin/mkhex4bin"
+' '
+
+**** Build Finished ****
